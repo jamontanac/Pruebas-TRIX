@@ -338,7 +338,7 @@ class Back_Testing:
         return data
 
     @classmethod
-    def Plot_Resumen_estrategia(cls,df:DataFrame,title:str="Resumen estrategia",plot_rounds:bool=False,plot_cumulative:bool=True,figsize:tuple=(17,5),column_position:str="Position",column_cumulative:str="Cumulative",color_round:str="rebeccapurple",color_cumulative:str="royalblue"):
+    def Plot_Resumen_estrategia(cls,df:DataFrame,title:str="Resumen estrategia",plot_rounds:bool=False,plot_cumulative:bool=True,figsize:tuple=(17,7),column_position:str="Position",column_cumulative:str="Cumulative",color_round:str="rebeccapurple",color_cumulative:str="royalblue"):
         if plot_rounds and plot_cumulative:
             fig=plt.figure(figsize=(25,10))
             plt.subplot(121)
@@ -361,3 +361,7 @@ class Back_Testing:
             plt.ticklabel_format(axis="y",style="sci",scilimits=(4,4),useMathText=True)
             plt.xlabel("Dates")
             plt.ylabel("USD")
+    @classmethod
+    def Resumen_acomulado_estrategia_1(cls,df:DataFrame,period:int=12,period_mid:int=9,name_offer:str="Offer",name_bid:str="Bid",resample: str="1D"):
+        orders=cls.Inicializar_resumen_TRIX_1(df,period=period,period_mid=period_mid,name_offer=name_offer,name_bid=name_bid,resample=resample)
+        return orders
