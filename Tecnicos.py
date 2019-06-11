@@ -338,7 +338,7 @@ class Back_Testing:
         return data
 
     @classmethod
-    def Plot_Resumen_estrategia(cls,df:DataFrame,title:str="Resumen estrategia",plot_rounds:bool=False,plot_cumulative:bool=True,figsize:tuple=(17,7),column_position:str="Position",column_cumulative:str="Cumulative",color_round:str="rebeccapurple",color_cumulative:str="royalblue"):
+    def Plot_Resumen_estrategia(cls,df:DataFrame,title:str=None,plot_rounds:bool=False,plot_cumulative:bool=True,figsize:tuple=(17,7),column_position:str="Position",column_cumulative:str="Cumulative",color_round:str="rebeccapurple",color_cumulative:str="royalblue"):
         if plot_rounds and plot_cumulative:
             fig=plt.figure(figsize=(25,10))
             plt.subplot(121)
@@ -352,18 +352,25 @@ class Back_Testing:
             plt.xlabel("Dates")
             plt.ylabel("USD")
         elif plot_rounds and not plot_cumulative:
-            df[column_position].plot(figsize=figsize,color=color_round)
+            df[column_position].plot(figsize=figsize,color=color_round,title=title)
             plt.ticklabel_format(axis="y",style="sci",scilimits=(4,4),useMathText=True)
             plt.xlabel("Dates")
             plt.ylabel("USD")
         elif plot_cumulative and not plot_rounds:
-            df[column_cumulative].plot(figsize=figsize,color=color_cumulative)
+            df[column_cumulative].plot(figsize=figsize,color=color_cumulative,title=title)
             plt.ticklabel_format(axis="y",style="sci",scilimits=(4,4),useMathText=True)
             plt.xlabel("Dates")
             plt.ylabel("USD")
     @classmethod
     def Resumen_acomulado_estrategia_1(cls,df:DataFrame,period:int=12,period_mid:int=9,name_offer:str="Offer",name_bid:str="Bid",resample: str="1D",Quantity:int=250,Max_trade:int=4):
         orders=cls.Inicializar_resumen_TRIX_1(df,period=period,period_mid=period_mid,name_offer=name_offer,name_bid=name_bid,resample=resample)
+        resume=cls.Filtro_Compra_Venta(orders,Quantity=Quantity,Max_trade=Max_trade)
+        Acumulate=cls.Obtener_resumen_estrategia(resume)
+        return Acumulate
+
+    @classmethod
+    def Resumen_acomulado_estrategia_2(cls,df:DataFrame,period:int=12,period_mid:int=9,name_offer:str="Offer",name_bid:str="Bid",resample: str="1D",Quantity:int=250,Max_trade:int=4):
+        orders=cls.Inicializar_resumen_TRIX_2(df,period=period,period_mid=period_mid,name_offer=name_offer,name_bid=name_bid,resample=resample)
         resume=cls.Filtro_Compra_Venta(orders,Quantity=Quantity,Max_trade=Max_trade)
         Acumulate=cls.Obtener_resumen_estrategia(resume)
         return Acumulate
