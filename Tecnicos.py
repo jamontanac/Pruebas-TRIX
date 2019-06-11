@@ -321,7 +321,6 @@ class Back_Testing:
         df["Cumulative"]=df.Total.cumsum()
         df.set_index("index",inplace=True)
         df.index.name=None
-        df["Time past"]=(df["Cumulative"].index-df.index[0]).astype('timedelta64[h]')
         return df
 
     @classmethod
@@ -336,6 +335,7 @@ class Back_Testing:
             aux=i+1
         data={"Position":pd.Series(close_position,index=dates_round),"Cumulative":pd.Series(np.cumsum(close_position),index=dates_round)}
         data=DataFrame(data=data)
+        data["Time past"]=(data["Cumulative"].index - data.index[0]).astype('timedelta64[h]')
         return data
 
     @classmethod
