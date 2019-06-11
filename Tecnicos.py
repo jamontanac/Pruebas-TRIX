@@ -362,6 +362,8 @@ class Back_Testing:
             plt.xlabel("Dates")
             plt.ylabel("USD")
     @classmethod
-    def Resumen_acomulado_estrategia_1(cls,df:DataFrame,period:int=12,period_mid:int=9,name_offer:str="Offer",name_bid:str="Bid",resample: str="1D"):
+    def Resumen_acomulado_estrategia_1(cls,df:DataFrame,period:int=12,period_mid:int=9,name_offer:str="Offer",name_bid:str="Bid",resample: str="1D",Quantity:int=250,Max_trade:int=4):
         orders=cls.Inicializar_resumen_TRIX_1(df,period=period,period_mid=period_mid,name_offer=name_offer,name_bid=name_bid,resample=resample)
-        return orders
+        resume=cls.Filtro_Compra_Venta(orders,Quantity=Quantity,Max_trade=Max_trade)
+        Acumulate=cls.Obtener_resumen_estrategia(resume)
+        return Acumulate
