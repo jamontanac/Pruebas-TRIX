@@ -321,6 +321,7 @@ class Back_Testing:
         df["Cumulative"]=df.Total.cumsum()
         df.set_index("index",inplace=True)
         df.index.name=None
+        df["Time past"]=(df["Cumulative"].index-df.index[0]).astype('timedelta64[h]')
         return df
 
     @classmethod
