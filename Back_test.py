@@ -16,8 +16,8 @@ def l(x,a,b):
 	return a*x+b
 a=range(3,40)
 resampled=sys.argv[1]
-archivo_best=open("Resultados_95.txt","w")
-archivo_rest=open("Resultados_8.txt","w")
+archivo_best=open("Resultados_95_"+resample+".txt","w")
+archivo_rest=open("Resultados_8_"+resample+".txt","w")
 archivo_best.write("Period"+"\t"+"Period mid"+"\t"+"R\n")
 archivo_rest.write("Period"+"\t"+"Period mid"+"\t"+"R\n")
 for i in itertools.product(a,repeat=2):
