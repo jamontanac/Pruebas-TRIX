@@ -297,6 +297,17 @@ class Tecnichal_Analisis:
         que al resto de los datos historicos.
         """
         return pd.Series(df[column].ewm(alpha=1 / period).mean(), name="{} SMMA period".format(period))
+    @classmethod
+    def ALMA(cls, df: DataFrame, period: int = 16, sigma:float=6.0, offset:float=0.8,column:str="Cierre")->Series:
+        def ALMA_AVG(x,Period,Sigma,Offset):
+            m=Offset*(Period-1)
+            s=Period/Sigma
+            wtd=np.array([np.exp(-(i-m)*(i-m)/(2*s*s)) for i in range(Period)])
+            return np.sum(x*wtd)/(np.sum(wtd))
+
+        return df[column].rolling(center=False, window=period, min_periods = period ).apply(ALMA_AVG,args=[period,offset,sigma],raw=True)
+
+
 class Back_Testing:
     @classmethod
     def Inicializar_resumen_TRIX_1(cls,df:DataFrame,period:int=12,period_mid:int=9,name_offer:str="Offer",name_bid:str="Bid",resample: str="1D"):
