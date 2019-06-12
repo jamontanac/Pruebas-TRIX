@@ -193,12 +193,63 @@ class Tecnichal_Analisis:
         return pd.concat([MACD,MACD_signal,MACD_histogram],axis=1)
 
     @classmethod
-    def MACD_TRIX(cls, df:DataFrame, period:int = 5 ,period_mid: int= 5, column:str="last"):
+    def MACD_TRIX(cls, df:DataFrame, period:int = 5 ,period_mid: int= 5, column:str="last")-> Series:
         TRIX = pd.Series(cls.TRIX(df,column=column,period=period),name="TRIX")
         TRIX_signal = pd.Series(TRIX.ewm(ignore_na=False,span=period_mid).mean(),name="SIGNAL")
         TRIX_histogram = pd.Series(TRIX-TRIX_signal,name="Histogram")
         return pd.concat([TRIX,TRIX_signal,TRIX_histogram],axis=1)
 
+    @classmethod
+    def ZLEMA(cls, df:DataFrame,column:str="Cierre", period: int = 26) -> Series:
+        """
+        ZLEMA es la abreviacion de Zero lag Exponential Moving Average. este fue desarrollado por
+        Jhon Ehlers y Rick Way. Zlema es un tipo de media movil exponencial pero su idea principal
+        es eliminar el lag que surge de la naturaleza intrinseca de la media movil y una nueva tendencia.
+        Esta sigue el precio de cierre, este provee un mejor precio promedio y responde mejor a movimientos
+        del precio
+        """
+        lag = (period -1)/2
+        return pd.Series((df[column] + (df[column].diff(lag))), name = "{} period ZLEMA".format(period))
+    @classmethod
+    def WMA(cls, df:DataFrame, period:int=9,column:str="Cierre")-> Series:
+        """
+        WMA o weighted moving average es de ayuda para suavisar la curva de precios para así identificar una mejor
+        tendencia de los precios. Se enfoca en los datos más recientes en lugar de los antiguos
+        """
+        d = (period * (period + 1)) / 2  # denominator
+        _weights = pd.Series(np.arange(1, period + 1))
+        weights = _weights.iloc[::-1]  # reverse the series
+
+        def linear(w):
+            def _compute(x):
+                return (w * x).sum() / d
+            return _compute
+
+        close_ = df[column].rolling(period, min_periods=period)
+        wma = close_.apply(linear(weights))
+
+        return pd.Series(wma, name="{0} period WMA.".format(period))
+
+    @classmethod
+    def HMA(cls, df:DataFrame, period:int = 16, column:str="Cierre") -> Series:
+        """
+        El indicador HMA se refiere a Hull moving average.
+        El promedio fue desarrollado por Alan Hull y es utilizado principalmente para identificar
+        la tendencia del mercado. una particularidad es que la curva del promedio movil de Hull
+        es más suave que la de SMA. más aún, con la idea de minimizar el lag entre HMA y el precio, este sigue
+        la actividad del precio de manera más cercana. Es usado especialmente paar traiding a mediano y largo plazo
+        """
+        import math
+
+        half_length = int(period / 2)
+        sqrt_length = int(math.sqrt(period))
+
+        wmaf = cls.WMA(df, period=half_length)
+        wmas = cls.WMA(df, period=period)
+        df['deltawma'] = 2 * wmaf - wmas
+        hma = cls.WMA(df, column="deltawma", period=sqrt_length)
+
+        return pd.Series(hma, name="{0} period HMA.".format(period))
 class Back_Testing:
     @classmethod
     def Inicializar_resumen_TRIX_1(cls,df:DataFrame,period:int=12,period_mid:int=9,name_offer:str="Offer",name_bid:str="Bid",resample: str="1D"):
