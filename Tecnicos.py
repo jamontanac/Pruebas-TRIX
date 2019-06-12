@@ -244,12 +244,59 @@ class Tecnichal_Analisis:
         half_length = int(period / 2)
         sqrt_length = int(math.sqrt(period))
 
-        wmaf = cls.WMA(df, period=half_length)
-        wmas = cls.WMA(df, period=period)
+        wmaf = cls.WMA(df, period=half_length,column=column)
+        wmas = cls.WMA(df, period=period,column=column)
         df['deltawma'] = 2 * wmaf - wmas
         hma = cls.WMA(df, column="deltawma", period=sqrt_length)
 
         return pd.Series(hma, name="{0} period HMA.".format(period))
+
+    @classmethod
+    def EVWMA(cls, df: DataFrame, period: int = 20,column_close:str="Cierre",column_volume:str="Volumen") -> Series:
+        """
+        El eVWMA puede ser interpretado como una aproximación al precio promedio pagado por persona
+        en los ultimos n periodos.
+        """
+
+        vol_sum = (df[column_volume].rolling(window=period).sum())  # floating shares in last N periods
+
+        x = (vol_sum - df[column_volume]) / vol_sum
+        y = (ohlcv[column_volume] * ohlcv[column_close]) / vol_sum
+
+        evwma = [0]
+
+        #  evwma = (evma[-1] * (vol_sum - volume)/vol_sum) + (volume * price / vol_sum)
+        for x, y in zip(x.fillna(0).iteritems(), y.iteritems()):
+            if x[1] == 0 or y[1] == 0:
+                evwma.append(0)
+            else:
+                evwma.append(evwma[-1] * x[1] + y[1])
+
+        return pd.Series(Series(evwma[1:], index=df.index),name="{0} period EVWMA.".format(period))
+    @classmethod
+    def TP(cls, df: DataFrame,column_high:str="Maximo",column_low:str="Minimo",column_close:str="Cierre") -> Series:
+        """
+        El TP o precio tipico se refiere a el promedio aritmetico entre el maximo el minimo y el cierre en un periodo
+        """
+        return pd.Series((df[column_high] + df[column_low] + df[column_close]) / 3, name="TP")
+
+    @classmethod
+    def VWAP(cls, df: DataFrame,column_volume:str="Volumen",column_high:str="Maximo",column_low:str="Minimo",column_close:str="Cierre") -> Series:
+        """
+        El VWAP o promedio pesado por volumen es una estrategia utilizada en planes de pensiones.
+        esto es calculado como la suma de dinero tranzado en cada transacción (precio por el volumen
+        de operaciones y se divide por este volumen total)
+        """
+
+        return pd.Series(((df[column_volume] * cls.TP(df,column_high=column_high,column_low=column_low,column_close=column_close)).cumsum()) / df[column_volume].cumsum(),name="VWAP.")
+
+    @classmethod
+    def SMMA(cls, df: DataFrame, period: int = 42, column: str = "Cierre") -> Series:
+        """
+        El SMMA (Smoothed Moving Average) da a precios recientes un peso igual
+        que al resto de los datos historicos.
+        """
+        return pd.Series(df[column].ewm(alpha=1 / period).mean(), name="{} SMMA period".format(period))
 class Back_Testing:
     @classmethod
     def Inicializar_resumen_TRIX_1(cls,df:DataFrame,period:int=12,period_mid:int=9,name_offer:str="Offer",name_bid:str="Bid",resample: str="1D"):
