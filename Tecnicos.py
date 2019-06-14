@@ -299,6 +299,12 @@ class Tecnichal_Analisis:
         return pd.Series(df[column].ewm(alpha=1 / period).mean(), name="{} SMMA period".format(period))
     @classmethod
     def ALMA(cls, df: DataFrame, period: int = 16, sigma:float=6.0, offset:float=0.8,column:str="Cierre")->Series:
+        """
+        ALMA o la media movil de Arnaud Legoux la cual es mucho mejor que una media movil sencilla, esta media movil
+        tiene como objetivo reducir el ruido y generar una señal que sea más confiable que las medias noviles convencionales
+        la idea general es aplicar una media movil y en sentido pasado-futuro y luego en el sentido contrario para así
+        tener un mejor valor de la señal. Seguido a esto se le ajusta un peso dado por una distribución gaussiana
+        """
         def ALMA_AVG(x,Period,Sigma,Offset):
             m=Offset*(Period-1)
             s=Period/Sigma
